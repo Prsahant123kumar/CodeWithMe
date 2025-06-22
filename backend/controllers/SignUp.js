@@ -44,7 +44,7 @@ const signup = async (req, res) => {
 
         // Send OTP Email
         try {
-            await sendVerificationEmail(email, verificationToken);
+            // await sendVerificationEmail(email, verificationToken);
             return res.status(200).json({
                 success: true,
                 message: "Verification email sent. Please check your inbox."
@@ -137,20 +137,10 @@ const verifyEmail = async (req, res) => {
         await TempUser.deleteOne({ email: tempUser.email });
 
         // Send welcome email
-        await sendWelcomeEmail(newUser.email, newUser.fullname);
+        // await sendWelcomeEmail(newUser.email, newUser.fullname);
 
         // ✅ Generate JWT token
-        const token = jwt.sign({ userId: newUser._id }, process.env.SECRET_KEY, {
-            expiresIn: "7d",
-        });
-
-        // ✅ Set token as HTTP-only cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production", // true in prod (https)
-            sameSite: "Lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
+        const token =generateToken(res, newUser);
 
         // ✅ Return user & token in response
         return res.status(200).json({

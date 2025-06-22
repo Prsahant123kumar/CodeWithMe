@@ -23,7 +23,7 @@ const PlatFormUserName = new mongoose.Schema(
             default: "",
         },
 
-        UserInfo: [{ type: mongoose.Schema.Types.ObjectId, ref: "Information" }],
+        authId: { type: mongoose.Schema.Types.ObjectId, ref: "UserAuth" },
 
     },
     { timestamps: true }

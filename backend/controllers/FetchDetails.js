@@ -1,14 +1,13 @@
 const axios = require("axios");
 const cheerio = require('cheerio');
-
+const {EnterUserName,UpdateUserName}=require("../controllers/EnterUserName.controller")
 // Axios instance with browser UA + timeout
 const http = axios.create({
   headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
   timeout: 10000
 });
 
-
-const FetchUserDetailLeetCode = async (req, res) => {
+const FetchCompleteLeetCodeDetails = async (req, res) => {
   const { username } = req.params;
 
   const profileQuery = `
@@ -42,68 +41,6 @@ const FetchUserDetailLeetCode = async (req, res) => {
     }
   `;
 
-  const headers = {
-    "Content-Type": "application/json",
-    Referer: `https://leetcode.com/${username}/`,
-    Origin: "https://leetcode.com",
-  };
-
-  try {
-    const [profileRes, ratingRes] = await Promise.all([
-      axios.post(
-        "https://leetcode.com/graphql",
-        {
-          query: profileQuery,
-          variables: { username },
-        },
-        { headers }
-      ),
-
-      axios.post(
-        "https://leetcode.com/graphql",
-        {
-          query: ratingQuery,
-          variables: { username },
-        },
-        { headers }
-      ),
-    ]);
-
-    const userData = profileRes.data.data.matchedUser;
-    const contestData = ratingRes.data.data.userContestRanking;
-
-    if (!userData) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json({
-      username: userData.username,
-      realName: userData.profile.realName,
-      aboutMe: userData.profile.aboutMe,
-      avatar: userData.profile.userAvatar,
-      reputation: userData.profile.reputation,
-      ranking: userData.profile.ranking,
-      contestRating: contestData?.rating ?? "N/A",
-      contestRanking: contestData?.globalRanking ?? "N/A",
-      attendedContests: contestData?.attendedContestsCount ?? 0,
-      totalSolved: userData.submitStats.acSubmissionNum.reduce(
-        (acc, item) => acc + item.count,
-        0
-      ),
-      breakdown: userData.submitStats.acSubmissionNum,
-    });
-  } catch (error) {
-    console.error(
-      "Error fetching user profile:",
-      error.response?.data ?? error.message
-    );
-    res.status(500).json({ error: "Something went wrong" });
-  }
-};
-
-const FetchContestsDetailsLeetCode = async (req, res) => {
-  const { username } = req.params;
-
   const contestHistoryQuery = `
     query getContestHistory($username: String!) {
       userContestRankingHistory(username: $username) {
@@ -129,112 +66,132 @@ const FetchContestsDetailsLeetCode = async (req, res) => {
   };
 
   try {
-    const response = await axios.post(
-      "https://leetcode.com/graphql",
-      {
+    const UserId = req.id;
+    if (UserId) {
+      await EnterUserName(UserId, { leetcode: username }); // update username in db
+      console.log(UserId,"inFetch")
+    }
+    console.log("gfgvb")
+    const [profileRes, ratingRes, contestRes] = await Promise.all([
+      axios.post("https://leetcode.com/graphql", {
+        query: profileQuery,
+        variables: { username },
+      }, { headers }),
+      axios.post("https://leetcode.com/graphql", {
+        query: ratingQuery,
+        variables: { username },
+      }, { headers }),
+
+      axios.post("https://leetcode.com/graphql", {
         query: contestHistoryQuery,
         variables: { username },
-      },
-      { headers }
-    );
+      }, { headers }),
+    ]);
 
-    const contestHistory = response.data.data.userContestRankingHistory;
+    const userData = profileRes.data.data.matchedUser;
+    const contestRatingData = ratingRes.data.data.userContestRanking;
+    const contestHistory = contestRes.data.data.userContestRankingHistory;
 
-    if (!contestHistory || contestHistory.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No contest data found for this user." });
+    if (!userData) {
+      return res.status(404).json({ error: "User not found on LeetCode" });
     }
 
-    // Filter contests where ranking is NOT 0 (indicating participation)
-    const registeredContests = contestHistory.filter(
-      (contest) => contest.ranking !== 0
+    const solved = userData.submitStats.acSubmissionNum.reduce(
+      (acc, item) => acc + item.count,
+      0
     );
 
-    if (registeredContests.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "User has not participated in any contests." });
-    }
-
+    const registeredContests = (contestHistory || []).filter(
+      (c) => c.ranking !== 0
+    );
+    console.log(userData)
     res.json({
-      contests: registeredContests.map((contest) => ({
-        contestTitle: contest.contest.title,
-        contestSlug: contest.contest.titleSlug,
-        startTime: new Date(contest.contest.startTime * 1000).toLocaleString(), // Convert to readable time
-        ranking: contest.ranking,
-        rating: contest.rating,
-        trend: contest.trendDirection,
-        problemsSolved: contest.problemsSolved,
-        totalProblems: contest.totalProblems,
-        finishTimeInSeconds: contest.finishTimeInSeconds,
+      username: userData.username,
+      realName: userData.profile.realName,
+      aboutMe: userData.profile.aboutMe,
+      avatar: userData.profile.userAvatar,
+      reputation: userData.profile.reputation,
+      ranking: userData.profile.ranking,
+      contestRating: contestRatingData?.rating ?? "N/A",
+      contestRanking: contestRatingData?.globalRanking ?? "N/A",
+      attendedContests: contestRatingData?.attendedContestsCount ?? 0,
+      totalSolved: solved,
+      problemBreakdown: userData.submitStats.acSubmissionNum,
+      contests: registeredContests.map((c) => ({
+        contestTitle: c.contest.title,
+        contestSlug: c.contest.titleSlug,
+        startTime: new Date(c.contest.startTime * 1000).toLocaleString(),
+        ranking: c.ranking,
+        rating: c.rating,
+        trend: c.trendDirection,
+        problemsSolved: c.problemsSolved,
+        totalProblems: c.totalProblems,
+        finishTimeInSeconds: c.finishTimeInSeconds,
       })),
     });
   } catch (error) {
-    console.error(
-      "Error fetching contest data:",
-      error.response?.data ?? error.message
-    );
-    res
-      .status(500)
-      .json({ error: "Something went wrong while fetching contest info" });
+    console.error("LeetCode fetch error:", error.response?.data || error.message);
+    return res.status(500).json({ error: "Failed to fetch LeetCode data" });
   }
 };
 
-const FetchUserDetailCF = async (req, res) => {
+
+
+const FetchCompleteCFDetails = async (req, res) => {
   const { handle } = req.params;
 
   try {
-    const response = await axios.get(
-      `https://codeforces.com/api/user.info?handles=${handle}`
-    );
-    const user = response.data.result[0];
+    const UserId = req.id;
+    if (UserId) {
+      await EnterUserName(UserId, { codeforces: handle }); // Save handle to DB
+    }
+
+    // Parallel fetch: user profile and contest rating history
+    const [profileRes, contestsRes] = await Promise.all([
+      axios.get(`https://codeforces.com/api/user.info?handles=${handle}`),
+      axios.get(`https://codeforces.com/api/user.rating?handle=${handle}`)
+    ]);
+
+    const user = profileRes.data.result[0];
+    const contests = contestsRes.data.result;
 
     res.json({
-      handle: user.handle,
-      rank: user.rank,
-      maxRank: user.maxRank,
-      rating: user.rating,
-      maxRating: user.maxRating,
-      contribution: user.contribution,
-      friendOfCount: user.friendOfCount,
-      organization: user.organization ?? "N/A",
-      avatar: user.avatar,
-      lastOnlineTimeSeconds: user.lastOnlineTimeSeconds,
+      profile: {
+        handle: user.handle,
+        rank: user.rank,
+        maxRank: user.maxRank,
+        rating: user.rating,
+        maxRating: user.maxRating,
+        contribution: user.contribution,
+        friendOfCount: user.friendOfCount,
+        organization: user.organization ?? "N/A",
+        avatar: user.avatar,
+        lastOnlineTimeSeconds: user.lastOnlineTimeSeconds
+      },
+      contests: contests.map((contest) => ({
+        contestId: contest.contestId,
+        contestName: contest.contestName,
+        rank: contest.rank,
+        oldRating: contest.oldRating,
+        newRating: contest.newRating,
+        ratingChange: contest.newRating - contest.oldRating,
+        contestTime: new Date(contest.ratingUpdateTimeSeconds * 1000).toLocaleString()
+      }))
     });
   } catch (error) {
     console.error(
-      "Error fetching Codeforces profile:",
+      "Error fetching Codeforces data:",
       error.response?.data ?? error.message
     );
-    res.status(500).json({ error: "Something went wrong fetching CF profile" });
+    res.status(500).json({ error: "Something went wrong fetching Codeforces data" });
   }
 };
 
-const FetchContestsDetailsCF = async (req, res) => {
-  const { handle } = req.params;
-
-  try {
-    const response = await axios.get(
-      `https://codeforces.com/api/user.rating?handle=${handle}`
-    );
-    const contests = response.data.result;
-
-    res.json(contests); // this includes only contests the user has participated in
-  } catch (error) {
-    console.error(
-      "Error fetching Codeforces contests:",
-      error.response?.data ?? error.message
-    );
-    res
-      .status(500)
-      .json({ error: "Something went wrong fetching CF contests" });
-  }
-};
 
 const FetchUserDetailsGFG = async (req, res) => {
   const { username } = req.params;
   try {
+    const result=await EnterUserName(handle)
     const response = await axios.get(
       `https://geeks-for-geeks-api.vercel.app/${username}`
     );
@@ -309,9 +266,11 @@ const FetchAllDetailsAtCoder = async(req,res) => {
 
 const FetchAllDetailsCodeChef = async(req,res) => {
     const { username } = req.params;
+    
     const profileUrl = `https://www.codechef.com/users/${username}`;
   
     try {
+      const result=await EnterUserName(username);
       const profRes = await http.get(profileUrl);
       const html = profRes.data;
       const $ = cheerio.load(html);
@@ -349,10 +308,8 @@ const FetchAllDetailsCodeChef = async(req,res) => {
 
 
 module.exports = {
-    FetchUserDetailLeetCode,
-    FetchContestsDetailsLeetCode,
-    FetchUserDetailCF,
-    FetchContestsDetailsCF,
+    FetchCompleteLeetCodeDetails,
+    FetchCompleteCFDetails,
     FetchUserDetailsGFG,
     FetchAllDetailsAtCoder,
     FetchAllDetailsCodeChef,

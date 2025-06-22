@@ -20,7 +20,7 @@ const InformationSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        authId: [{ type: mongoose.Schema.Types.ObjectId, ref: "UserAuth" }],
+        authId: { type: mongoose.Schema.Types.ObjectId, ref: "UserAuth" },
 
     },
     { timestamps: true }

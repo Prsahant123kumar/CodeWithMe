@@ -2,30 +2,27 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  FetchUserDetailLeetCode,
-  FetchContestsDetailsLeetCode,
-  FetchUserDetailCF,
-  FetchContestsDetailsCF,
+  FetchCompleteLeetCodeDetails,
+  FetchCompleteCFDetails,
   FetchUserDetailsGFG,
   FetchAllDetailsAtCoder,
   FetchAllDetailsCodeChef,
 } = require("../controllers/FetchDetails");
+const { isAuthenticated } = require("../middlewares/isAuthenticated");
 
 // LeetCode
-router.get("/leetcode/:username", FetchUserDetailLeetCode);
-router.get("/leetcode/contests/:username", FetchContestsDetailsLeetCode);
+router.route("/leetcode/:username").get(isAuthenticated, FetchCompleteLeetCodeDetails);
 
 // Codeforces
-router.get("/codeforces/:handle", FetchUserDetailCF);
-router.get("/codeforces/contests/:handle", FetchContestsDetailsCF);
+router.route("/codeforces/:handle").get(isAuthenticated, FetchCompleteCFDetails);
 
 // GFG
-router.get("/gfg/:username", FetchUserDetailsGFG);
+router.route("/gfg/:username").get(isAuthenticated, FetchUserDetailsGFG);
 
 // AtCoder
-router.get("/atcoder/:username", FetchAllDetailsAtCoder);
+router.route("/atcoder/:username").get(isAuthenticated, FetchAllDetailsAtCoder);
 
 // CodeChef
-router.get("/codechef/:username", FetchAllDetailsCodeChef);
+router.route("/codechef/:username").get(isAuthenticated, FetchAllDetailsCodeChef);
 
 module.exports = router;
