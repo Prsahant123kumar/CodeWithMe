@@ -4,7 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FiSend, FiArrowLeft } from 'react-icons/fi';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import socketIo from "socket.io-client"
+import { io } from 'socket.io-client';
 
 const ChatPage = () => {
     const { state } = useLocation();
@@ -14,21 +14,37 @@ const ChatPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const messagesEndRef = useRef(null);
+    const socket = useRef(null);
     const userStorage = JSON.parse(localStorage.getItem("user-storage"));
     const currentUserId = userStorage?.state?.user?._id;
-    const socket=socketIo("http://localhost:3000",{transports: ['websocket']})
-    console.log(currentUserId,"InChat USer")
     const { platform, username } = useParams();
 
-    // Scroll to bottom when messages update
+    // Initialize socket connection and setup user
     useEffect(() => {
-      
-    // socket.on('connect',()=>{
-    //     // alert('connected')
-    // })
-      
-    }, [])
-    
+        socket.current = io("http://localhost:3000", {
+            transports: ["websocket"],
+            withCredentials: true
+        });
+
+        // Setup current user with socket
+        socket.current.emit("setup", currentUserId);
+
+        // Handle incoming messages
+        socket.current.on("message received", (newMessage) => {
+            setMessages(prev => [...prev, newMessage]);
+        });
+
+        // Handle connection errors
+        socket.current.on("connect_error", (err) => {
+            console.error("Socket connection error:", err);
+        });
+
+        return () => {
+            socket.current.disconnect();
+        };
+    }, [currentUserId]);
+
+    // Scroll to bottom when messages update
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -42,9 +58,9 @@ const ChatPage = () => {
                     `http://localhost:3000/api/v1/message/messages/${receiverId}`,
                     { withCredentials: true }
                 );
-                
+
                 let fetchedMessages = [];
-                
+
                 if (response.data && Array.isArray(response.data.messages)) {
                     fetchedMessages = response.data.messages;
                 } else if (response.data && response.data[0]?.messages) {
@@ -52,7 +68,7 @@ const ChatPage = () => {
                 } else if (Array.isArray(response.data)) {
                     fetchedMessages = response.data;
                 }
-                
+
                 setMessages(fetchedMessages || []);
             } catch (err) {
                 setError('Failed to load messages');
@@ -78,7 +94,7 @@ const ChatPage = () => {
                 `http://localhost:3000/api/v1/profile/${platform}/${username}`,
                 { withCredentials: true }
             );
-            
+
             if (profileResponse.data.success && profileResponse.data.profile) {
                 await fetchMessages(profileResponse.data.profile.authId);
             }
@@ -94,18 +110,20 @@ const ChatPage = () => {
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !state?.profile?.authId) return;
 
-        let tempMessage;
+        // Generate a client-side temporary ID with a prefix
+        const tempId = `client-${Date.now()}`;
+
+        const tempMessage = {
+            _id: tempId,
+            senderId: currentUserId,
+            receiverId: state.profile.authId,
+            message: newMessage,
+            createdAt: new Date().toISOString(),
+            isTemp: true
+        };
+
         try {
             setLoading(true);
-            
-            tempMessage = {
-                _id: Date.now().toString(),
-                senderId: currentUserId,
-                receiverId: state.profile.authId,
-                message: newMessage,
-                createdAt: new Date().toISOString()
-            };
-            
             setMessages(prev => [...prev, tempMessage]);
             setNewMessage('');
 
@@ -119,17 +137,23 @@ const ChatPage = () => {
             );
 
             const sentMessage = response.data;
-            if (sentMessage) {
-                setMessages(prev => prev.map(msg => 
-                    msg._id === tempMessage._id ? sentMessage : msg
-                ));
-            }
+
+            // Replace the temporary message with the server's version
+            setMessages(prev => prev.map(msg =>
+                msg._id === tempId ? sentMessage : msg
+            ));
+
+            // Emit the message to the server
+            socket.current.emit("new message", {
+                senderId: currentUserId,
+                receiverId: state.profile.authId,
+                message: newMessage
+            });
         } catch (err) {
             setError('Failed to send message');
             console.error('Send message error:', err);
-            if (tempMessage) {
-                setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
-            }
+            // Remove the temporary message on error
+            setMessages(prev => prev.filter(msg => msg._id !== tempId));
         } finally {
             setLoading(false);
         }
@@ -143,9 +167,9 @@ const ChatPage = () => {
         );
     }
 
-    const displayProfile = state?.profile || { 
-        username: username, 
-        [platform]: username 
+    const displayProfile = state?.profile || {
+        username: username,
+        [platform]: username
     };
 
     return (
@@ -157,7 +181,7 @@ const ChatPage = () => {
             {/* Header */}
             <div className="bg-white p-4 shadow-sm border-b border-gray-200 flex items-center justify-between">
                 <div className="flex items-center">
-                    <button 
+                    <button
                         onClick={() => navigate(-1)}
                         className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-600"
                     >
@@ -196,7 +220,6 @@ const ChatPage = () => {
                     <div className="space-y-3">
                         {messages.map((message) => {
                             const isSender = message.senderId === currentUserId;
-                            console.log(message.senderId,currentUserId,"inChat")
                             return (
                                 <motion.div
                                     key={message._id}
@@ -205,16 +228,14 @@ const ChatPage = () => {
                                     className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
-                                        className={`max-w-xs md:max-w-md rounded-2xl px-4 py-2 ${
-                                            isSender
+                                        className={`max-w-xs md:max-w-md rounded-2xl px-4 py-2 ${isSender
                                                 ? 'bg-blue-500 text-white rounded-br-none'
                                                 : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                                        }`}
+                                            }`}
                                     >
                                         <p className="text-sm">{message.message}</p>
-                                        <p className={`text-xs mt-1 text-right ${
-                                            isSender ? 'text-blue-100' : 'text-gray-500'
-                                        }`}>
+                                        <p className={`text-xs mt-1 text-right ${isSender ? 'text-blue-100' : 'text-gray-500'
+                                            }`}>
                                             {new Date(message.createdAt).toLocaleTimeString([], {
                                                 hour: '2-digit',
                                                 minute: '2-digit',
@@ -252,11 +273,10 @@ const ChatPage = () => {
                     <button
                         onClick={handleSendMessage}
                         disabled={loading || !newMessage.trim()}
-                        className={`ml-2 p-2 rounded-full ${
-                            loading || !newMessage.trim()
+                        className={`ml-2 p-2 rounded-full ${loading || !newMessage.trim()
                                 ? 'text-gray-400'
                                 : 'text-blue-500 hover:text-blue-600'
-                        }`}
+                            }`}
                     >
                         <FiSend className="h-5 w-5" />
                     </button>

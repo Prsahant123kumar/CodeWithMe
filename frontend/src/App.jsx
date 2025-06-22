@@ -8,6 +8,8 @@ import ProfileFetcher from "./Pages/ProfileFetcher";
 import ForgotPassword from "./Pages/ForgotPassword";
 import EnterUserNameToChat from "./Pages/EnterUserNameToChat";
 import ChatPage from "./Pages/ChatPage";
+import MenuPage from "./Pages/MenuPage";
+import ExtraInformation from "./Pages/ExtraInformation";
 import { userStore } from "./store/UserStore";
 import LoadingSpinner from "./components/LoadingSpinner"; // Create this component
 import axios from "axios";
@@ -36,7 +38,7 @@ const PublicRoute = ({ children }) => {
 
 const appRouter = createBrowserRouter([
   {
-    path: "/",
+    path: "/ProfileFetcher",
     element: <ProtectedRoute><ProfileFetcher /></ProtectedRoute>, // Example protected route
   },
   { 
@@ -66,6 +68,14 @@ const appRouter = createBrowserRouter([
   {
     path: "/ChatPage",
     element: <ProtectedRoute><ChatPage /></ProtectedRoute>
+  },
+  {
+    path: "/",
+    element: <ProtectedRoute><MenuPage /></ProtectedRoute>
+  },
+  {
+    path: "/ExtraInformation",
+    element: <ProtectedRoute><ExtraInformation /></ProtectedRoute>
   },
   { 
     path: "/ForgotPassword", 

@@ -1,12 +1,13 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
-const getReceiverSocketId =require("../socket/server")
+const { io, getReceiverSocketId } = require("../socket/server");
 
 const sendMessage = async (req, res) => {
   try {
-    const senderId = req.id; // from auth middleware
-    const {  receiverId,message } = req.body;
-    console.log(message,receiverId,senderId)
+    const senderId = req.id;
+    const { receiverId, message } = req.body;
+    
+    // Find or create conversation
     let conversation = await Conversation.findOne({
       members: { $all: [senderId, receiverId] }
     });
@@ -17,15 +18,30 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    const newMessage = new Message({ senderId, receiverId, message });
+    // Create and save new message
+    const newMessage = new Message({ 
+      senderId, 
+      receiverId, 
+      message,
+      createdAt: new Date()
+    });
     await newMessage.save();
 
+    // Add message to conversation
     conversation.messages.push(newMessage._id);
     await conversation.save();
 
-    // const receiverSocketId = getReceiverSocketId(receiverId);
-    // if (receiverSocketId) {
-    //   io.to(receiverSocketId).emit("newMessage", newMessage);
+    // Get socket IDs for both users
+    const receiverSocketId = getReceiverSocketId(receiverId);
+
+    // Emit to receiver if online
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("message received", newMessage);
+    }
+
+    // Also emit back to sender for confirmation
+    // if (senderSocketId) {
+    //   io.to(senderSocketId).emit("message received", newMessage);
     // }
 
     res.status(201).json(newMessage);
