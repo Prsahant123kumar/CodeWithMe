@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import heroImage from '../assets/heroImage.avif'
 import { Link } from 'react-router-dom'
+import { userStore } from '../store/UserStore'
 
 function MenuPage() {
   const [activeTab, setActiveTab] = useState(null)
-
+  const {isAuthenticate}=userStore();
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero Section */}
@@ -44,12 +45,23 @@ function MenuPage() {
             >
               Start Chat
             </Link>
-            <button 
+            <Link to="/AllUser"
               onClick={() => setActiveTab('contacts')}
               className="px-8 py-3 bg-gray-800 border border-gray-700 rounded-full font-semibold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-lg"
             >
               My Contacts
-            </button>
+            </Link>
+            {isAuthenticate?<Link to="/logout"
+              onClick={() => setActiveTab('contacts')}
+              className="px-8 py-3 bg-gray-800 border border-gray-700 rounded-full font-semibold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-lg"
+            >
+              Logout
+            </Link>:<Link to="/login"
+              onClick={() => setActiveTab('contacts')}
+              className="px-8 py-3 bg-gray-800 border border-gray-700 rounded-full font-semibold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-lg"
+            >
+              Login
+            </Link>}
           </div>
         </div>
         

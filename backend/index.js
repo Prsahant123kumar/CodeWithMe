@@ -7,7 +7,6 @@ const cors = require("cors");
 const contestDetails=require('./routes/Contest.Details.routes')
 const userRoute = require("./routes/User.Auth.routes");
 const eventsDetails=require('./routes/Events.routes')
-const userPersonalDetails = require("./routes/User.PersonalDetails.routes");
 const FindUser=require("./routes/FindUser.routes.js")
 const message=require("./routes/message.routes")
 const { app, server } =require("./socket/server.js");
@@ -34,7 +33,6 @@ app.use(cors(corsOptions));
 
 // ✅ API Routes
 app.use("/api/v1/user", userRoute);
-app.use("/api/v1/user-infromation", userPersonalDetails);
 app.use("/api/v1/contests", eventsDetails);
 app.use("/api/v1/", contestDetails);
 app.use("/api/v1/user",FindUser);

@@ -3,13 +3,12 @@ import Signup from "./Pages/SignUp";
 import Login from "./Pages/Login";
 import { useEffect } from "react";
 import VerifyEmail from "./Pages/Verify-Email";
-import PersonalDetails from "./Pages/PersonalDetails";
 import ProfileFetcher from "./Pages/ProfileFetcher";
 import ForgotPassword from "./Pages/ForgotPassword";
 import EnterUserNameToChat from "./Pages/EnterUserNameToChat";
 import ChatPage from "./Pages/ChatPage";
 import MenuPage from "./Pages/MenuPage";
-import ExtraInformation from "./Pages/ExtraInformation";
+import AllUser from "./Pages/AllUser";
 import { userStore } from "./store/UserStore";
 import LoadingSpinner from "./components/LoadingSpinner"; // Create this component
 import axios from "axios";
@@ -22,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
   
-  return isAuthenticate ? children : <Navigate to="/login" replace />;
+  return isAuthenticate ? children : <Navigate to="/" replace />;
 };
 
 // Public Route Component (for routes that shouldn't be accessible when authenticated)
@@ -51,11 +50,7 @@ const appRouter = createBrowserRouter([
   },
   { 
     path: "/VerifyEmail", 
-    element: <ProtectedRoute><VerifyEmail /></ProtectedRoute> 
-  },
-  { 
-    path: "/PersonalDetails", 
-    element: <ProtectedRoute><PersonalDetails /></ProtectedRoute> 
+    element: <PublicRoute><VerifyEmail /></PublicRoute> 
   },
   { 
     path: "/ProfileFetcher", 
@@ -71,11 +66,11 @@ const appRouter = createBrowserRouter([
   },
   {
     path: "/",
-    element: <ProtectedRoute><MenuPage /></ProtectedRoute>
+    element: <MenuPage />
   },
   {
-    path: "/ExtraInformation",
-    element: <ProtectedRoute><ExtraInformation /></ProtectedRoute>
+    path: "/AllUser",
+    element: <ProtectedRoute><AllUser /></ProtectedRoute>
   },
   { 
     path: "/ForgotPassword", 

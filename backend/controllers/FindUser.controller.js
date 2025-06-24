@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 const { UserName } = require("../models/PlatFormUserName")
 const Conversation = require("../models/Conversation");
-const {Information}=require("../models/UserInformation")
 
 const findUser = async (req, res) => {
     try {
@@ -51,7 +50,7 @@ const findUser = async (req, res) => {
 
 const findAllContacts = async (req, res) => {
     try {
-        const userId = "68555b79b77cab4abb152c03"; // The user ID you're searching for
+        const userId = "685a5374902bda72d2f70e7c"; // The user ID you're searching for
 
         const conversations = await Conversation.find({
             members: userId
@@ -62,11 +61,33 @@ const findAllContacts = async (req, res) => {
                 options: { sort: { createdAt: -1 }, limit: 1 } // get only the most recent message
             })
             .sort({ updatedAt: -1 }); // sort by most recently updated
-        console.log(conversations)
+        // console.log(conversations)
+        const allUser = []
+        let i = 0
+        for (let i = 0; i < conversations.length; i++) {
+            const conversation = conversations[i];
+
+            for (let j = 0; j < conversation.members.length; j++) {
+                const member = conversation.members[j];
+
+                if (member._id.toString() !== userId) {
+                    const info = await Information.findOne({ authId: member._id.toString() });
+                    if (info) {
+                        allUser[i] = {
+                            id: info.authId,
+                            name: info.fullname,
+                            avatar: info.profilePicture,
+                            lastMessage: populatedConversation.messages[0]?.message || null,
+                            lastMessageTime: populatedConversation.messages[0]?.createdAt || null
+                        };
+                    }
+                }
+            }
+        }
         return res.status(200).json({
             success: true,
             message: "User Found Successfully",
-            users: conversations
+            allUser: allUser
         });
     } catch (error) {
         console.error(error);
@@ -77,4 +98,4 @@ const findAllContacts = async (req, res) => {
     }
 }
 
-module.exports = { findUser , findAllContacts }
+module.exports = { findUser, findAllContacts }
