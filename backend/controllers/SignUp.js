@@ -9,9 +9,9 @@ const { DemoUserAuth: TempUser } = require("../models/TempUserAuth");
 
 const signup = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        console.log(email,password)
-        if (!email || !password) {
+        const { fullName, email, password } = req.body;
+        console.log(fullName,email,password)
+        if (!fullName || !email || !password) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
@@ -36,6 +36,7 @@ const signup = async (req, res) => {
 
         // Store user details temporarily in Redis
         await TempUser.create({
+            fullName,
             email,
             password: hashedPassword,
             verificationToken,
@@ -128,6 +129,7 @@ const verifyEmail = async (req, res) => {
 
         // Save verified user to the main User collection
         const newUser = await User.create({
+            fullName: tempUser.fullName,
             email: tempUser.email,
             password: tempUser.password, // Already hashed
             isVerified: true
@@ -148,9 +150,8 @@ const verifyEmail = async (req, res) => {
             message: "Email verified successfully.",
             user: {
                 _id: newUser._id,
-                fullname: newUser.fullname,
+                fullname: newUser.fullName,
                 email: newUser.email,
-                contact: newUser.contact,
                 isVerified: newUser.isVerified
             },
             token // Optional: only if frontend uses it
@@ -164,17 +165,24 @@ const verifyEmail = async (req, res) => {
 
 
 
-const logout = async (_, res) => {
+const logout = async (req, res) => {
     try {
-        return res.clearCookie("token").status(200).json({
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        return res.status(200).json({
             success: true,
             message: "Logged out successfully."
         });
     } catch (error) {
-        console.log(error);
+        console.log("Logout error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 const forgotPassword = async (req, res) => {
     try {

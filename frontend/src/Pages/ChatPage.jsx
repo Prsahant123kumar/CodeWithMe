@@ -18,6 +18,7 @@ const ChatPage = () => {
     const userStorage = JSON.parse(localStorage.getItem("user-storage"));
     const currentUserId = userStorage?.state?.user?._id;
     const { platform, username } = useParams();
+    console.log(state?.Name,"rthrhr",state);
 
     // Initialize socket connection and setup user
     useEffect(() => {
@@ -188,10 +189,10 @@ const ChatPage = () => {
                         <FiArrowLeft className="h-5 w-5" />
                     </button>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                        {displayProfile.username?.charAt(0).toUpperCase() || 'U'}
+                        {state?.Name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="ml-3">
-                        <h2 className="font-semibold text-gray-800">{displayProfile.username || 'Unknown User'}</h2>
+                        <h2 className="font-semibold text-gray-800">{state?.Name || 'Unknown User'}</h2>
                         <p className="text-xs text-gray-500">
                             {platform || state?.platform}: {displayProfile[platform || state?.platform]}
                         </p>

@@ -30,8 +30,11 @@ const EnterUserNameToChat = () => {
 
             if (response.data.success) {
                 // Navigate to chat page with user data
+                console.log(response.data,"inEnte")
                 navigate('/chatPage', { 
-                    state: { 
+                    state: {
+
+                        Name:response.data.Name,
                         profile: response.data.user,
                         platform ,
                         messages: response.data.messages

@@ -32,11 +32,11 @@ const VerifyEmail = () => {
         email: user?.email // Include the email from store
       });
 
-      setMessage(res.data.message);
-      setUser(res.data.user);
-      setIsAuthenticate(true);
+      // setMessage(res.data.message);
+      // setUser(res.data.user);
+      setIsAuthenticate(false);
       setIsCheckingAuth(false);
-      navigate("/"); // Redirect to protected route
+      navigate("/login"); // Redirect to protected route
     } catch (err) {
       setError(err.response?.data?.message || "Verification failed");
     } finally {

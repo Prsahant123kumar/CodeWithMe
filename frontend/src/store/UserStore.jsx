@@ -11,7 +11,8 @@ export const userStore = create(
       setIsAuthenticate: (data) => set({ isAuthenticate: data }),
       setIsCheckingAuth: (data) => set({ isCheckingAuth: data }),
       // Add a clear function if needed
-      clearUser: () => set({ user: null, isAuthenticate: false }),
+      clearUser: () => set({ user: null, isAuthenticate: false, isCheckingAuth: false }),
+
     }),
     {
       name: "user-storage", // unique name for the localStorage key

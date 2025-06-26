@@ -1,6 +1,7 @@
 // src/components/AllUser.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AllUser = () => {
     const [users, setUsers] = useState([]);
@@ -9,42 +10,28 @@ const AllUser = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Mock data for frontend testing
-        const mockUsers = [
-            {
-                id: "68555b79b77cab4abb152c03",
-                name: "Prashant",
-                avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-                lastMessage: "Hey, how are you doing?",
-                lastMessageTime: new Date(),
-                unreadCount: 3
-            },
-            {
-                id: "68555b79b77cab4abb152c04",
-                name: "Sarah",
-                avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-                lastMessage: "About tomorrow's meeting...",
-                lastMessageTime: new Date(Date.now() - 3600000),
-                unreadCount: 0
-            },
-            {
-                id: "68555b79b77cab4abb152c05",
-                name: "Alex",
-                avatar: null,
-                lastMessage: "Did you see the news?",
-                lastMessageTime: new Date(Date.now() - 86400000),
-                unreadCount: 5
+        const fetchUsers = async () => {
+            try {
+                const mockUsers = await axios.get('http://localhost:3000/api/v1/user/contact', {
+                    withCredentials: true
+                });
+
+                console.log(mockUsers.data.allUser);
+
+                const timer = setTimeout(() => {
+                    setUsers(mockUsers.data.allUser);
+                    setLoading(false);
+                }, 800); // Simulate network delay
+
+                return () => clearTimeout(timer);
+            } catch (error) {
+                console.error('Error fetching users:', error);
             }
-        ];
+        };
 
-        // Simulate API call with timeout
-        const timer = setTimeout(() => {
-            setUsers(mockUsers);
-            setLoading(false);
-        }, 800); // Simulate network delay
-
-        return () => clearTimeout(timer);
+        fetchUsers();
     }, []);
+
 
     const handleUserClick = (userId) => {
         navigate(`/chat/${userId}`);

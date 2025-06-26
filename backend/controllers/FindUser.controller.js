@@ -1,6 +1,8 @@
 const mongoose = require("mongoose")
 const { UserName } = require("../models/PlatFormUserName")
+const {UserAuth}=require("../models/UserAuth")
 const Conversation = require("../models/Conversation");
+const {Message}=require("../models/Message")
 
 const findUser = async (req, res) => {
     try {
@@ -16,7 +18,7 @@ const findUser = async (req, res) => {
 
         const user = await UserName.findOne({ [platform]: name });
         console.log(user)
-
+        const Name=await UserAuth.findById(user.authId);
         if (!user) {
             return res.status(409).json({
                 success: false,
@@ -33,6 +35,7 @@ const findUser = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "User Found Successfully",
+            Name:Name.fullName,
             user: user,
             messages: conversation ? conversation.messages : []
         });
@@ -50,7 +53,7 @@ const findUser = async (req, res) => {
 
 const findAllContacts = async (req, res) => {
     try {
-        const userId = "685a5374902bda72d2f70e7c"; // The user ID you're searching for
+        const userId = req.id; // The user ID you're searching for
 
         const conversations = await Conversation.find({
             members: userId
@@ -71,14 +74,17 @@ const findAllContacts = async (req, res) => {
                 const member = conversation.members[j];
 
                 if (member._id.toString() !== userId) {
-                    const info = await Information.findOne({ authId: member._id.toString() });
+                    const info = await UserAuth.findById(member._id.toString())
                     if (info) {
+                        console.log(conversation.messages[0],"inFindUser")
+                        const lastMessage=conversation.messages[0]?.message || null;
+                        const lastMessageTime=conversation.messages[0]?.createdAt || null;
                         allUser[i] = {
                             id: info.authId,
-                            name: info.fullname,
-                            avatar: info.profilePicture,
-                            lastMessage: populatedConversation.messages[0]?.message || null,
-                            lastMessageTime: populatedConversation.messages[0]?.createdAt || null
+                            name: info.fullName,
+                            lastMessage: lastMessage,
+                            lastMessageTime: lastMessageTime,
+                            unreadCount: 5
                         };
                     }
                 }

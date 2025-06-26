@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const TempAuthSchema = new mongoose.Schema(
     {
+        fullName: {
+            type:String,
+            required:true
+        },
         email: {
             type: String,
             required: true

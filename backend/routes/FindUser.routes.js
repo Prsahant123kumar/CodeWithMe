@@ -4,5 +4,5 @@ const { isAuthenticated } = require("../middlewares/isAuthenticated");
 
 const router=express.Router();
 router.route("/findUser").post(isAuthenticated, findUser)
-router.route("/contact").get(findAllContacts)
+router.route("/contact").get(isAuthenticated, findAllContacts)
 module.exports = router;

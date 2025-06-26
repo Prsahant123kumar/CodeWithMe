@@ -43,17 +43,17 @@ export default function LeetCodeProfile({ data }) {
         {/* Problems Solved Card */}
         <Card className="bg-gray-900 text-white border border-gray-700">
           <CardHeader>
-            <CardTitle className="text-xl">Problems Solved</CardTitle>
+            <CardTitle className="text-xl text-blue-500">Problems Solved</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
               <div className="flex justify-between mb-1">
-                <span className="font-medium">Total Solved</span>
+                <span className="font-medium text-blue-500">Total Solved</span>
                 <span className="font-bold text-blue-400">{data.totalSolved}</span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-2.5">
                 <div 
-                  className="bg-blue-600 h-2.5 rounded-full" 
+                  className="bg-blue-600 h-2.5 rounded-full text-gray-700" 
                   style={{ width: `${(data.totalSolved / 2500) * 100}%` }}
                 ></div>
               </div>
@@ -61,7 +61,7 @@ export default function LeetCodeProfile({ data }) {
 
             {data.problemBreakdown?.map((category, index) => (
               <div key={index} className="mb-3 last:mb-0">
-                <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-sm mb-1 text-gray-700">
                   <span className={`
                     ${category.difficulty === 'Easy' ? 'text-green-500' :
                     category.difficulty === 'Medium' ? 'text-yellow-500' :

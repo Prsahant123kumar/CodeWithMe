@@ -2,10 +2,27 @@ import { useState } from 'react'
 import heroImage from '../assets/heroImage.avif'
 import { Link } from 'react-router-dom'
 import { userStore } from '../store/UserStore'
-
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 function MenuPage() {
   const [activeTab, setActiveTab] = useState(null)
-  const {isAuthenticate}=userStore();
+  const navigate=useNavigate()
+  const {isAuthenticate ,clearUser, setIsCheckingAuth}=userStore();
+  const Logout = async () => {
+  try {
+    await axios.get("http://localhost:3000/api/v1/user/logout", {
+      withCredentials: true, // Important for cookie-based logout
+    });
+
+    // Clear Zustand store + localStorage
+    clearUser();
+
+    // Optional: navigate to login or homepage
+    navigate("/login");
+  } catch (err) {
+    console.error("Logout failed", err);
+  }
+};
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero Section */}
@@ -51,13 +68,13 @@ function MenuPage() {
             >
               My Contacts
             </Link>
-            {isAuthenticate?<Link to="/logout"
-              onClick={() => setActiveTab('contacts')}
+            {isAuthenticate?<button 
+              onClick={() => Logout()}
               className="px-8 py-3 bg-gray-800 border border-gray-700 rounded-full font-semibold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-lg"
             >
               Logout
-            </Link>:<Link to="/login"
-              onClick={() => setActiveTab('contacts')}
+            </button>:<Link to="/login"
+              onClick={() => setActiveTab('login')}
               className="px-8 py-3 bg-gray-800 border border-gray-700 rounded-full font-semibold hover:bg-gray-700 transition-all transform hover:scale-105 shadow-lg"
             >
               Login

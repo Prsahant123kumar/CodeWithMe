@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 export const usePlatformProfile = create(
-    // persist(
+    persist(
         (set) => ({
             UserLeetcode: null,
             UserCodeforces: null,
@@ -14,5 +14,5 @@ export const usePlatformProfile = create(
             setAtcoderData: (data) => set({ UserAtcoder: data }),
             setCodingNinjaData: (data) => set({ UserCodingNinja: data }),
         })
-    // )
+    )
 )
