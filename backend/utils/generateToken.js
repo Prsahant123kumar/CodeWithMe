@@ -9,8 +9,8 @@ const generateToken = (res, user) => {
 
     res.cookie("token", token, {
         httpOnly: true,
-        sameSite: 'strict', // good for CSRF protection
-        secure: process.env.NODE_ENV === "production", // true only on HTTPS
+        sameSite: "none",
+        secure: true, // true only on HTTPS
         maxAge: 24 * 60 * 60 * 1000,
     });
 
