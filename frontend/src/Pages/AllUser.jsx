@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const AllUser = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,7 +12,7 @@ const AllUser = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const mockUsers = await axios.get('http://localhost:3000/api/v1/user/contact', {
+                const mockUsers = await axios.get(`${API_URL}/api/v1/user/contact`, {
                     withCredentials: true
                 });
 

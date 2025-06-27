@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { userStore } from "../store/UserStore";
 import LoadingSpinner from "../components/LoadingSpinner";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/v1/user/login", 
+        `${API_URL}/api/v1/user/login`, 
         form,
         { withCredentials: true }
       );

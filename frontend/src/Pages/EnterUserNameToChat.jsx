@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EnterUserNameToChat = () => {
     const [platform, setPlatform] = useState('leetcode');
@@ -20,7 +21,7 @@ const EnterUserNameToChat = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:3000/api/v1/user/findUser', {
+            const response = await axios.post(`${API_URL}/api/v1/user/findUser`, {
                 name: username,
                 platform: platform
             },{

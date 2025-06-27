@@ -8,6 +8,7 @@ import CodeforcesProfile from "../components/CodeforcesProfile";
 import GFGProfile from "../components/GFGProfile";
 import AtCoderProfile from "../components/AtCoderProfile";
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ProfileFetcher() {
   const {
@@ -66,7 +67,7 @@ export default function ProfileFetcher() {
     setError(null);
 
     try {
-      const res = await axios.get(`http://localhost:3000/api/v1/${platform}/${username}`,{
+      const res = await axios.get(`${API_URL}/api/v1/${platform}/${username}`,{
         withCredentials: true
       });
       const result = res.data;

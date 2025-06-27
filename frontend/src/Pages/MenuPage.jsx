@@ -4,13 +4,16 @@ import { Link } from 'react-router-dom'
 import { userStore } from '../store/UserStore'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 function MenuPage() {
   const [activeTab, setActiveTab] = useState(null)
   const navigate=useNavigate()
   const {isAuthenticate ,clearUser, setIsCheckingAuth}=userStore();
   const Logout = async () => {
   try {
-    await axios.get("http://localhost:3000/api/v1/user/logout", {
+    await axios.get(`${API_URL}/api/v1/user/logout`, {
       withCredentials: true, // Important for cookie-based logout
     });
 

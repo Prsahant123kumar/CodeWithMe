@@ -1,14 +1,15 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { ChatState } from '../Context/ChatProvider'; // ⛳️ use correct hook
+import { ChatState } from '../Context/ChatProvider'; //  use correct hook
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EnterUserName = () => {
-  const API_END_POINT = "http://localhost:3000";
+  // const API_END_POINT = "http://localhost:3000";
   const [userName, setUserName] = useState("");
   const [userList, setUserList] = useState([]);
   const navigate = useNavigate();
-  const { setOtherUserId } = ChatState(); // ✅ use context hook
+  const { setOtherUserId } = ChatState(); //  use context hook
 
   const handleChange = async (e) => {
     const value = e.target.value;
@@ -20,7 +21,7 @@ const EnterUserName = () => {
     }
 
     try {
-      const response = await axios.get(`${API_END_POINT}/api/vi/allUser`, {
+      const response = await axios.get(`${API_URL}/api/vi/allUser`, {
         params: { search: value }, // match backend
         headers: {
           "content-type": "application/json"
@@ -35,7 +36,7 @@ const EnterUserName = () => {
   };
 
   const handleUserClick = (user) => {
-    setOtherUserId(user._id); // 👈 set for ChatPage
+    setOtherUserId(user._id);
     navigate("/chatpage");
   };
 

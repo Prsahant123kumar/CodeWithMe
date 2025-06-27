@@ -4,6 +4,7 @@ import { FiShield } from "react-icons/fi";
 import { userStore } from "../store/UserStore";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const VerifyEmail = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:3000/api/v1/user/verify-email", {
+      const res = await axios.post(`${API_URL}/api/v1/user/verify-email`, {
         verificationCode: code,
         email: user?.email // Include the email from store
       });

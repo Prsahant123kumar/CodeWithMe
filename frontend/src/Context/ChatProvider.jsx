@@ -8,8 +8,8 @@ const ChatProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [notification, setNotification] = useState([]);
   const [chats, setChats] = useState([]);
-  const [otherUserId, setOtherUserId] = useState(); // 👈 NEW
-  const [currentUserId, setCurrentUserId] = useState(); // 👈 NEW
+  const [otherUserId, setOtherUserId] = useState(); 
+  const [currentUserId, setCurrentUserId] = useState(); 
 
   const history = useHistory();
 

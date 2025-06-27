@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { FiSend, FiArrowLeft } from 'react-icons/fi';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { io } from 'socket.io-client';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const ChatPage = () => {
     const { state } = useLocation();
@@ -22,7 +23,7 @@ const ChatPage = () => {
 
     // Initialize socket connection and setup user
     useEffect(() => {
-        socket.current = io("http://localhost:3000", {
+        socket.current = io(`${API_URL}`, {
             transports: ["websocket"],
             withCredentials: true
         });
@@ -56,7 +57,7 @@ const ChatPage = () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    `http://localhost:3000/api/v1/message/messages/${receiverId}`,
+                    `${API_URL}/api/v1/message/messages/${receiverId}`,
                     { withCredentials: true }
                 );
 
@@ -92,7 +93,7 @@ const ChatPage = () => {
         try {
             setLoading(true);
             const profileResponse = await axios.get(
-                `http://localhost:3000/api/v1/profile/${platform}/${username}`,
+                `${API_URL}/api/v1/profile/${platform}/${username}`,
                 { withCredentials: true }
             );
 
@@ -129,7 +130,7 @@ const ChatPage = () => {
             setNewMessage('');
 
             const response = await axios.post(
-                'http://localhost:3000/api/v1/message/send',
+                `${API_URL}/api/v1/message/send`,
                 {
                     receiverId: state.profile.authId,
                     message: newMessage

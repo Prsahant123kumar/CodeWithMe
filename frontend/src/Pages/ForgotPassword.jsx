@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { FiMail } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/v1/user/forgot-password", { email });
+      const res = await axios.post(`${API_URL}/api/v1/user/forgot-password`, { email });
       setMessage(res.data.message);
       // Optionally navigate to another page after successful submission
       // navigate("/reset-password-instructions");

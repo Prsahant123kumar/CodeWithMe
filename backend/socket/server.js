@@ -7,7 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Update with your client URL
+    origin: process.env.FRONTEND_URL, // Update with your client URL
     methods: ["GET", "POST"],
     credentials: true
   }
