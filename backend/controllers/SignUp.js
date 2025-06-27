@@ -139,7 +139,7 @@ const verifyEmail = async (req, res) => {
         await TempUser.deleteOne({ email: tempUser.email });
 
         // Send welcome email
-        // await sendWelcomeEmail(newUser.email, newUser.fullname);
+        await sendWelcomeEmail(newUser.email, newUser.fullname);
 
         // ✅ Generate JWT token
         const token =generateToken(res, newUser);
