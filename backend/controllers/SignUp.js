@@ -45,7 +45,7 @@ const signup = async (req, res) => {
 
         // Send OTP Email
         try {
-            // await sendVerificationEmail(email, verificationToken);
+            await sendVerificationEmail(email, verificationToken);
             return res.status(200).json({
                 success: true,
                 message: "Verification email sent. Please check your inbox."
