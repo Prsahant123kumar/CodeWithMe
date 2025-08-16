@@ -28,10 +28,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use("/api/v1/user", userRoute);
-app.use("/api/v1/contests", eventsDetails);
-app.use("/api/v1/", contestDetails);
 app.use("/api/v1/user", FindUser);
 app.use("/api/v1/message", message);
+app.use("/api/v1/contests", eventsDetails);
+app.use("/api/v1/", contestDetails);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

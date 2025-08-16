@@ -19,22 +19,22 @@ export default function LeetCodeProfile({ data }) {
                 className="w-16 h-16 rounded-full object-cover border-2 border-blue-500"
               />
               <div>
-                <h3 className="font-bold text-lg">{data.realName || data.username}</h3>
-                <p className="text-gray-400 text-sm">@{data.username}</p>
+                <h3 className="font-bold text-lg text-black">{data.realName || data.username}</h3>
+                <p className="text-black text-sm">@{data.username}</p>
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-400">Reputation</span>
-                <span className="font-medium">{data.reputation}</span>
+                <span className="text-black">Reputation</span>
+                <span className="font-medium text-black">{data.reputation}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Global Rank</span>
-                <span className="font-medium">#{data.ranking}</span>
+                <span className="text-black">Global Rank</span>
+                <span className="font-medium text-black">#{data.ranking}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Contest Rating</span>
-                <span className="font-medium">{Math.round(data.contestRating)}</span>
+                <span className="text-black">Contest Rating</span>
+                <span className="font-medium text-black">{Math.round(data.contestRating)}</span>
               </div>
             </div>
           </CardContent>
@@ -46,19 +46,6 @@ export default function LeetCodeProfile({ data }) {
             <CardTitle className="text-xl text-blue-500">Problems Solved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-4">
-              <div className="flex justify-between mb-1">
-                <span className="font-medium text-blue-500">Total Solved</span>
-                <span className="font-bold text-blue-400">{data.totalSolved}</span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full text-gray-700" 
-                  style={{ width: `${(data.totalSolved / 2500) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
             {data.problemBreakdown?.map((category, index) => (
               <div key={index} className="mb-3 last:mb-0">
                 <div className="flex justify-between text-sm mb-1 text-gray-700">
@@ -140,17 +127,17 @@ export default function LeetCodeProfile({ data }) {
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="sticky top-0 bg-gray-900">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contest</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rank</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rating</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Solved</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Contest</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Rank</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Rating</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Solved</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
                   {data.contests?.map((contest, index) => (
-                    <tr key={index} className="hover:bg-gray-800">
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm font-medium">
+                    <tr key={index} className="hover:bg-blue-300">
+                      <td className="px-4 py-3 whitespace-nowrap text-black">
+                        <div className="text-sm font-medium text-blue-950">
                           {contest.contestTitle.length > 30 
                             ? `${contest.contestTitle.substring(0, 30)}...` 
                             : contest.contestTitle}
@@ -159,7 +146,7 @@ export default function LeetCodeProfile({ data }) {
                           {new Date(contest.startTime).toLocaleDateString()}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-black">
                         #{contest.ranking}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -182,7 +169,7 @@ export default function LeetCodeProfile({ data }) {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-black">
                         {contest.problemsSolved}/{contest.totalProblems}
                       </td>
                     </tr>
@@ -196,3 +183,4 @@ export default function LeetCodeProfile({ data }) {
     </div>
   );
 }
+

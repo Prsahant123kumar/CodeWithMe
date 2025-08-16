@@ -45,7 +45,7 @@ const ChatPage = () => {
             socket.current.disconnect();
         };
     }, [currentUserId]);
-
+    
     // Scroll to bottom when messages update
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
