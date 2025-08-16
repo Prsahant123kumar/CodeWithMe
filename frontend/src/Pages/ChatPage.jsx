@@ -1,3 +1,4 @@
+// ChatPage (updated)
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -19,24 +20,30 @@ const ChatPage = () => {
     const userStorage = JSON.parse(localStorage.getItem("user-storage"));
     const currentUserId = userStorage?.state?.user?._id;
     const { platform, username } = useParams();
-    console.log(state?.Name,"rthrhr",state);
 
-    // Initialize socket connection and setup user
+    const [currentChatUserId, setCurrentChatUserId] = useState(null);
+
     useEffect(() => {
         socket.current = io(`${API_URL}`, {
             transports: ["websocket"],
             withCredentials: true
         });
 
-        // Setup current user with socket
+    
         socket.current.emit("setup", currentUserId);
 
-        // Handle incoming messages
         socket.current.on("message received", (newMessage) => {
-            setMessages(prev => [...prev, newMessage]);
+            if (!currentChatUserId) return; // no chat open
+            const belongs =
+                String(newMessage.senderId) === String(currentChatUserId) ||
+                String(newMessage.receiverId) === String(currentChatUserId);
+            if (belongs) {
+                setMessages(prev => [...prev, newMessage]);
+            } else {
+                console.log("message for other chat ignored", newMessage);
+            }
         });
 
-        // Handle connection errors
         socket.current.on("connect_error", (err) => {
             console.error("Socket connection error:", err);
         });
@@ -44,42 +51,46 @@ const ChatPage = () => {
         return () => {
             socket.current.disconnect();
         };
-    }, [currentUserId]);
-    
-    // Scroll to bottom when messages update
+    }, [currentUserId, currentChatUserId]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Fetch messages when component mounts or profile changes
-    useEffect(() => {
-        const fetchMessages = async (receiverId) => {
-            try {
-                setLoading(true);
-                const response = await axios.get(
-                    `${API_URL}/api/v1/message/messages/${receiverId}`,
-                    { withCredentials: true }
-                );
+    const fetchMessages = async (receiverId) => {
+        try {
+            setLoading(true);
+            setMessages([]); 
+            setCurrentChatUserId(receiverId);
 
-                let fetchedMessages = [];
+            const response = await axios.get(
+                `${API_URL}/api/v1/message/messages/${receiverId}`,
+                { withCredentials: true }
+            );
 
-                if (response.data && Array.isArray(response.data.messages)) {
-                    fetchedMessages = response.data.messages;
-                } else if (response.data && response.data[0]?.messages) {
-                    fetchedMessages = response.data[0].messages;
-                } else if (Array.isArray(response.data)) {
-                    fetchedMessages = response.data;
-                }
+            let fetchedMessages = [];
 
-                setMessages(fetchedMessages || []);
-            } catch (err) {
-                setError('Failed to load messages');
-                console.error('Fetch messages error:', err);
-            } finally {
-                setLoading(false);
+            if (response.data && Array.isArray(response.data.messages)) {
+                fetchedMessages = response.data.messages;
+            } else if (response.data && response.data[0]?.messages) {
+                fetchedMessages = response.data[0].messages;
+            } else if (Array.isArray(response.data)) {
+                fetchedMessages = response.data;
+            } else if (response.data) {
+                fetchedMessages = response.data;
             }
-        };
 
+            setMessages(fetchedMessages || []);
+        } catch (err) {
+            setError('Failed to load messages');
+            console.error('Fetch messages error:', err);
+            setMessages([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         if (state?.profile?.authId) {
             fetchMessages(state.profile.authId);
         } else if (platform && username) {
@@ -99,6 +110,8 @@ const ChatPage = () => {
 
             if (profileResponse.data.success && profileResponse.data.profile) {
                 await fetchMessages(profileResponse.data.profile.authId);
+            } else {
+                navigate('/EnterUserNameToChat');
             }
         } catch (err) {
             setError('Failed to load chat');
@@ -110,7 +123,8 @@ const ChatPage = () => {
     };
 
     const handleSendMessage = async () => {
-        if (!newMessage.trim() || !state?.profile?.authId) return;
+        const receiverId = state?.profile?.authId || currentChatUserId;
+        if (!newMessage.trim() || !receiverId) return;
 
         // Generate a client-side temporary ID with a prefix
         const tempId = `client-${Date.now()}`;
@@ -118,7 +132,7 @@ const ChatPage = () => {
         const tempMessage = {
             _id: tempId,
             senderId: currentUserId,
-            receiverId: state.profile.authId,
+            receiverId,
             message: newMessage,
             createdAt: new Date().toISOString(),
             isTemp: true
@@ -132,7 +146,7 @@ const ChatPage = () => {
             const response = await axios.post(
                 `${API_URL}/api/v1/message/send`,
                 {
-                    receiverId: state.profile.authId,
+                    receiverId,
                     message: newMessage
                 },
                 { withCredentials: true }
@@ -140,17 +154,17 @@ const ChatPage = () => {
 
             const sentMessage = response.data;
 
-            // Replace the temporary message with the server's version
             setMessages(prev => prev.map(msg =>
                 msg._id === tempId ? sentMessage : msg
             ));
 
-            // Emit the message to the server
-            socket.current.emit("new message", {
-                senderId: currentUserId,
-                receiverId: state.profile.authId,
-                message: newMessage
-            });
+            if (socket.current && socket.current.emit) {
+                socket.current.emit("new message", {
+                    senderId: currentUserId,
+                    receiverId,
+                    message: newMessage
+                });
+            }
         } catch (err) {
             setError('Failed to send message');
             console.error('Send message error:', err);
@@ -221,7 +235,7 @@ const ChatPage = () => {
                 ) : (
                     <div className="space-y-3">
                         {messages.map((message) => {
-                            const isSender = message.senderId === currentUserId;
+                            const isSender = String(message.senderId) === String(currentUserId);
                             return (
                                 <motion.div
                                     key={message._id}

@@ -16,7 +16,7 @@ const MessageSchema = new mongoose.Schema({
     required: true,
     trim: true,
     validate: {
-      validator: (value) => value.length > 0, // 🔥 typo: "length" not "lenght"
+      validator: (value) => value.length > 0, 
       message: "Message cannot be empty"
     }
   },
@@ -24,6 +24,6 @@ const MessageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-}, { timestamps: true }); // 🔥 typo: should be `timestamps` (plural)
+}, { timestamps: true }); 
 
 module.exports = mongoose.model("Message", MessageSchema);

@@ -1,6 +1,5 @@
-const mongoose=require('mongoose')
-const { UserAuth: User } = require("./UserAuth");
-const Message =require("./Message")
+// models/Conversation.js
+const mongoose = require('mongoose');
 
 const conversationSchema = new mongoose.Schema({
   members: [
@@ -12,11 +11,11 @@ const conversationSchema = new mongoose.Schema({
   ],
   messages: [
     {
-      type: mongoose.Schema.Types.ObjectId, //  typo: should be `type`, not `types`
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
       default: []
     }
   ]
 }, { timestamps: true });
 
-module.exports = mongoose.model("Conversation", conversationSchema); // model name should not be schema name
+module.exports = mongoose.model("Conversation", conversationSchema);

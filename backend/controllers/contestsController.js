@@ -31,7 +31,7 @@ async function fetchCF() {
         endTime: fmt((c.startTimeSeconds + c.durationSeconds) * 1000),
       }));
   } catch (e) {
-    console.warn('⚠️ CF fetch failed:', e.message);
+    console.warn('CF fetch failed:', e.message);
     return [];
   }
 }
