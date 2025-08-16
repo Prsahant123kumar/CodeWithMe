@@ -114,17 +114,17 @@ const generateWelcomeEmailHtml = (name) => {
             <body>
                 <div class="email-container">
                     <div class="email-header">
-                        <h1>Welcome to Patel Food!</h1>
+                        <h1>Welcome to CodeWithM!</h1>
                     </div>
                     <div class="email-body">
                         <p>Hi ${name},</p>
                         <p>Congratulations! Your email has been successfully verified.</p>
-                        <p>We are excited to have you on board at Patel Food. Explore our platform and enjoy our services.</p>
+                        <p>Explore our platform and enjoy our services.</p>
                         <p>If you have any questions or need assistance, feel free to reach out to us.</p>
-                        <p>Best Regards,<br/>The Patel Food Team</p>
+                        <p>Best Regards,CodeWithMe team
                     </div>
                     <div class="email-footer">
-                        <p>&copy; 2024 Patel Food. All rights reserved.</p>
+                        <p>&copy; 2025 CodeWithM. All rights reserved.</p>
                     </div>
                 </div>
             </body>

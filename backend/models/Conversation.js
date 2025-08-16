@@ -12,11 +12,11 @@ const conversationSchema = new mongoose.Schema({
   ],
   messages: [
     {
-      type: mongoose.Schema.Types.ObjectId, // 🔥 typo: should be `type`, not `types`
+      type: mongoose.Schema.Types.ObjectId, //  typo: should be `type`, not `types`
       ref: "Message",
       default: []
     }
   ]
 }, { timestamps: true });
 
-module.exports = mongoose.model("Conversation", conversationSchema); // 🔥 model name should not be schema name
+module.exports = mongoose.model("Conversation", conversationSchema); // model name should not be schema name

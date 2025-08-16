@@ -32,11 +32,6 @@ const sendVerificationEmail = expressAsyncHandler(async (email, verificationToke
   }
 });
 
-
-
-
-
-
 const sendWelcomeEmail = expressAsyncHandler(async (email, name) => {
   const htmlContent = generateWelcomeEmailHtml(name);
   var mailOptions = {
